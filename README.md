@@ -123,7 +123,6 @@ send_result = nezu_sticker.process("send")
 ```plaintext
 LINE_CSRF_TOKEN=your_csrf_token_here
 LINE_COOKIE=your_cookie_here
-LINE_EXISTING_TOKEN=your_existing_token_here
 ```
 
 3. `.gitignore`ファイルに`.env`を追加して、機密情報が Git リポジトリにコミットされないようにしてください。
