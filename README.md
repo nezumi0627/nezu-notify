@@ -102,13 +102,15 @@ nezu_local_image = NezuNotify(
 send_result = nezu_local_image.process("send")
 ```
 
-6. スティッカーの送信
+6. スタンプの送信
 
 ```python
 nezu_sticker = NezuNotify(
     token=existing_token,
     message_type="sticker",
-    message_content="スティッカーの内容"
+    message_content="ステッカー メッセージ!!",
+    sticker_id="171",
+    sticker_package_id="2"
 )
 send_result = nezu_sticker.process("send")
 ```
