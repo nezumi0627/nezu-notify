@@ -8,6 +8,7 @@ NezuNotify は、LINE Notify を簡単に利用するための Python ライブ�
 
 - LINE グループへのメッセージ送信
 - 画像の送信（URL またはローカルファイル）
+- スティッカーの送信
 - トークンの生成と管理
 - トークンの失効処理
 - グループ情報の取得
@@ -99,6 +100,17 @@ nezu_local_image = NezuNotify(
     message_content=local_image_path
 )
 send_result = nezu_local_image.process("send")
+```
+
+6. スティッカーの送信
+
+```python
+nezu_sticker = NezuNotify(
+    token=existing_token,
+    message_type="sticker",
+    message_content="スティッカーの内容"
+)
+send_result = nezu_sticker.process("send")
 ```
 
 ## 注意事項

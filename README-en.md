@@ -8,6 +8,7 @@ NezuNotify is a Python library that simplifies the use of LINE Notify. Its main 
 
 - Sending messages to LINE groups
 - Sending images (via URL or local file)
+- Sending stickers
 - Token generation and management
 - Token revocation
 - Retrieving group information
@@ -99,6 +100,19 @@ nezu_local_image = NezuNotify(
     message_content=local_image_path
 )
 send_result = nezu_local_image.process("send")
+```
+
+6. Sending Stickers
+
+```python
+nezu_sticker = NezuNotify(
+    token=existing_token,
+    message_type="sticker",
+    message_content="Sticker Message!!",
+    sticker_id="171",
+    sticker_package_id="2"
+)
+send_result = nezu_sticker.process("send")
 ```
 
 ## Precautions
