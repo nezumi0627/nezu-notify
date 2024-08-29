@@ -14,12 +14,7 @@ NezuNotify is a Python library that simplifies the use of LINE Notify. Its main 
 
 ## Installation
 
-`bash
-
-# Clone the repository
-
-git clone https://github.com/nezumi0627/NezuNotify
-`
+`git clone https://github.com/nezumi0627/NezuNotify.git`
 
 ## Usage
 
@@ -75,17 +70,14 @@ groups = nezu_create.get_groups()
 
 4. Sending Messages
 
-`python
-
-# Send a text message
-
+```python
 nezu_text = NezuNotify(
-token=existing_token,
-message_type="text",
-message_content="This is a test message."
+    token=existing_token,
+    message_type="text",
+    message_content="This is a test message."
 )
 send_result = nezu_text.process("send")
-`
+```
 
 5. Sending Images
 
@@ -93,18 +85,18 @@ send_result = nezu_text.process("send")
 # Send image using URL
 image_url = "https://example.com/image.jpg"
 nezu_url_image = NezuNotify(
- token=existing_token,
- message_type="image",
- message_content=image_url
+    token=existing_token,
+    message_type="image",
+    message_content=image_url
 )
 send_result = nezu_url_image.process("send")
 
 # Send image using local file
 local_image_path = "/path/to/local/image.jpg"
 nezu_local_image = NezuNotify(
- token=existing_token,
- message_type="image",
- message_content=local_image_path
+    token=existing_token,
+    message_type="image",
+    message_content=local_image_path
 )
 send_result = nezu_local_image.process("send")
 ```
