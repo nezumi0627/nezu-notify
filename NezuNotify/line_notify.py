@@ -45,6 +45,16 @@ class LineNotify:
             logging.error(f"Error occurred while sending image: {e}")
             raise
 
+    def send_sticker(
+        self, message: str, sticker_id: str, sticker_package_id: str
+    ) -> None:
+        data = {
+            "message": message,
+            "stickerId": sticker_id,
+            "stickerPackageId": sticker_package_id,
+        }
+        self._make_request(APIUrls.NOTIFY_URL, method="POST", data=data)
+
     def _make_request(
         self, endpoint: str, method: str = "GET", data: Optional[Dict] = None
     ) -> requests.Response:

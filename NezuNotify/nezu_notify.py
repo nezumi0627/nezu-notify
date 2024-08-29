@@ -14,6 +14,8 @@ class NezuNotify:
         token: Optional[str] = None,
         message_type: Optional[str] = None,
         message_content: Optional[str] = None,
+        sticker_id: Optional[str] = None,
+        sticker_package_id: Optional[str] = None,
     ):
         self.csrf = csrf
         self.cookie = cookie
@@ -21,6 +23,8 @@ class NezuNotify:
         self.token = token
         self.message_type = message_type
         self.message_content = message_content
+        self.sticker_id = sticker_id
+        self.sticker_package_id = sticker_package_id
 
         if csrf and cookie:
             self.group_manager = GroupManager(csrf, cookie)
@@ -81,6 +85,14 @@ class NezuNotify:
             self.line_notify.send_image_with_url("", self.message_content)
         elif self.message_type == "image_path":
             self.line_notify.send_image_with_local_path("", self.message_content)
+        elif self.message_type == "sticker":
+            if not self.sticker_id or not self.sticker_package_id:
+                raise ValueError(
+                    "スティッカーの送信にはsticker_idとsticker_package_idが必要です。"
+                )
+            self.line_notify.send_sticker(
+                self.message_content, self.sticker_id, self.sticker_package_id
+            )
         else:
             raise ValueError("無効なメッセージタイプです。")
 
