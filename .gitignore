@@ -16,6 +16,7 @@ Archive/
 
 # デバッグ用ファイル
 test.py
+token.json
 
 # Jupyter Notebookのチェックポイント
 .ipynb_checkpoints/

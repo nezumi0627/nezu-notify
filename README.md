@@ -115,6 +115,19 @@ nezu_sticker = NezuNotify(
 send_result = nezu_sticker.process("send")
 ```
 
+## 環境変数の設定
+
+1. プロジェクトのルートディレクトリに`.env`ファイルを作成します。
+2. `.env`ファイルに以下の内容を追加し、実際の値を置き換えてください：
+
+```plaintext
+LINE_CSRF_TOKEN=your_csrf_token_here
+LINE_COOKIE=your_cookie_here
+LINE_EXISTING_TOKEN=your_existing_token_here
+```
+
+3. `.gitignore`ファイルに`.env`を追加して、機密情報が Git リポジトリにコミットされないようにしてください。
+
 ## 注意事項
 
 - LINE Notify のトークンは安全に管理してください。

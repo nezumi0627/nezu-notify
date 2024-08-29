@@ -115,6 +115,17 @@ nezu_sticker = NezuNotify(
 send_result = nezu_sticker.process("send")
 ```
 
+## Setting Environment Variables
+
+1. Create a `.env` file in the root directory of your project.
+2. Add the following content to the `.env` file, replacing the placeholders with your actual values:
+
+```plaintext
+LINE_CSRF_TOKEN=your_csrf_token_here
+LINE_COOKIE=your_cookie_here
+LINE_EXISTING_TOKEN=your_existing_token_here
+```
+
 ## Precautions
 
 - Securely manage your LINE Notify tokens.
