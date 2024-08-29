@@ -19,61 +19,43 @@ NezuNotify は、LINE Notify を簡単に利用するための Python ライブ�
 
 ## 使用方法
 
-1. 環境変数の設定
+1. プロジェクトのルートディレクトリに`.env`ファイルを作成します。
+2. `.env`ファイルに以下の内容を追加し、実際の値を置き換えてください：
 
-```python
-# 環境変数を設定します
-import os
-
-# CSRF トークンを設定
-os.environ["LINE_CSRF_TOKEN"] = "YOUR_CSRF_TOKEN"
-
-# Cookie を設定
-os.environ["LINE_COOKIE"] = "YOUR_COOKIE"
-
-# 対象 MID を設定
-os.environ["LINE_TARGET_MID"] = "YOUR_TARGET_MID"
-
-# 既存トークンを設定
-os.environ["LINE_EXISTING_TOKEN"] = "YOUR_EXISTING_TOKEN"
-```
-
-2. 初期設定
-
-```python
-from NezuPuls.nezu_notify import NezuNotify
-
-# 環境変数から認証情報を取得
-csrf = os.environ.get("LINE_CSRF_TOKEN")
-cookie = os.environ.get("LINE_COOKIE")
-target_mid = os.environ.get("LINE_TARGET_MID")
-existing_token = os.environ.get("LINE_EXISTING_TOKEN")
+```plaintext
+LINE_CSRF_TOKEN=""
+LINE_COOKIE=""
 ```
 
 3. トークン管理
 
 ```python
 # トークンの作成
-nezu_create = NezuNotify(csrf=csrf, cookie=cookie, target_mid=target_mid)
-new_token = nezu_create.process("create", "新しいトークン")
+nezu_create = NezuNotify(csrf=csrf, cookie=cookie, target_mid=target_id)
+new_token = nezu_create.process("create", "NezuNotify")
 
 # トークンのステータス確認
-nezu_check = NezuNotify(token=new_token)
-status = nezu_check.process("check", new_token)
+nezu_check = NezuNotify(token=token, csrf=csrf, cookie=cookie)
+status = nezu_check.process("check", token)
 
 # トークンの無効化
-nezu_revoke = NezuNotify(token=new_token)
-revoke_result = nezu_revoke.process("revoke", new_token)
+nezu = NezuNotify(token=token, csrf=csrf, cookie=cookie)
+revoke_result = nezu.process("revoke")
 
 # グループ一覧の取得
-groups = nezu_create.get_groups()
+group_manager = GroupManager(csrf=csrf, cookie=cookie)
+groups = group_manager.get_groups()
+
+for i, group in enumerate(groups, 1):
+    logging.info(f"{i}. 名前: {group['name']}, ID: {group['mid']}, 画像URL: {group['pictureUrl']}")
+
 ```
 
 4. メッセージの送信
 
 ```python
 nezu_text = NezuNotify(
-    token=existing_token,
+    token=token,
     message_type="text",
     message_content="これはテストメッセージです。"
 )
@@ -86,7 +68,7 @@ send_result = nezu_text.process("send")
 # URL を使用して画像を送信
 image_url = "https://example.com/image.jpg"
 nezu_url_image = NezuNotify(
-    token=existing_token,
+    token=token,
     message_type="image",
     message_content=image_url
 )
@@ -95,7 +77,7 @@ send_result = nezu_url_image.process("send")
 # ローカルファイルから画像を送信
 local_image_path = "/path/to/local/image.jpg"
 nezu_local_image = NezuNotify(
-    token=existing_token,
+    token=token,
     message_type="image",
     message_content=local_image_path
 )
@@ -106,7 +88,7 @@ send_result = nezu_local_image.process("send")
 
 ```python
 nezu_sticker = NezuNotify(
-    token=existing_token,
+    token=token,
     message_type="sticker",
     message_content="ステッカー メッセージ!!",
     sticker_id="171",
@@ -114,19 +96,6 @@ nezu_sticker = NezuNotify(
 )
 send_result = nezu_sticker.process("send")
 ```
-
-## 環境変数の設定
-
-1. プロジェクトのルートディレクトリに`.env`ファイルを作成します。
-2. `.env`ファイルに以下の内容を追加し、実際の値を置き換えてください：
-
-```plaintext
-LINE_CSRF_TOKEN=your_csrf_token_here
-LINE_COOKIE=your_cookie_here
-LINE_EXISTING_TOKEN=your_existing_token_here
-```
-
-3. `.gitignore`ファイルに`.env`を追加して、機密情報が Git リポジトリにコミットされないようにしてください。
 
 ## 注意事項
 
