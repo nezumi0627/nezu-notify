@@ -1,3 +1,4 @@
+import logging
 from typing import List, Optional, Union
 
 from .group_manager import GroupManager
@@ -26,6 +27,10 @@ class NezuNotify:
         self.sticker_id = sticker_id
         self.sticker_package_id = sticker_package_id
 
+        self.group_manager = None
+        self.token_manager = None
+        self.line_notify = None
+
         if csrf and cookie:
             self.group_manager = GroupManager(csrf, cookie)
             self.token_manager = TokenManager(csrf, cookie)
@@ -45,6 +50,8 @@ class NezuNotify:
             raise ValueError(
                 "無効なアクションです。'create'、'revoke'、'check'、または'send'である必要があります。"
             )
+        if action in ["create", "revoke", "check"] and not self.token_manager:
+            raise ValueError("トークン管理アクションには csrf と cookie が必要です。")
         return actions[action](data)
 
     def _create(self, data: Optional[str] = None) -> str:
@@ -72,28 +79,27 @@ class NezuNotify:
         return self.token_manager.check_token_status(data)
 
     def _send(self, data: Optional[str] = None) -> str:
-        if not self.token:
-            raise ValueError("メッセージの送信にはトークンが必要です。")
-        if not self.message_type or not self.message_content:
-            raise ValueError(
-                "メッセージの送信にはメッセージタイプとコンテンツが必要です。"
-            )
+        notify = LineNotify(self.token)
 
         if self.message_type == "text":
-            self.line_notify.send_message(self.message_content)
-        elif self.message_type == "image_url":
-            self.line_notify.send_image_with_url("", self.message_content)
-        elif self.message_type == "image_path":
-            self.line_notify.send_image_with_local_path("", self.message_content)
-        elif self.message_type == "sticker":
-            if not self.sticker_id or not self.sticker_package_id:
-                raise ValueError(
-                    "スティッカーの送信にはsticker_idとsticker_package_idが必要です。"
+            notify.send_message(self.message_content)
+        elif self.message_type == "image":
+            if self.message_content.startswith(("http://", "https://")):
+                notify.send_image_with_url("画像を送信します", self.message_content)
+            else:
+                notify.send_image_with_local_path(
+                    "画像を送信します", self.message_content
                 )
-            self.line_notify.send_sticker(
-                self.message_content, self.sticker_id, self.sticker_package_id
-            )
         else:
             raise ValueError("無効なメッセージタイプです。")
 
         return "メッセージが送信されました。"
+
+    def get_groups(self) -> List[dict]:
+        if not hasattr(self, "group_manager"):
+            raise ValueError("グループ管理には csrf と cookie が必要です。")
+        try:
+            return self.group_manager.get_groups()
+        except Exception as e:
+            logging.error(f"グループの取得に失敗しました: {str(e)}")
+            raise

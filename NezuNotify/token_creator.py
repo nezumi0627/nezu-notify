@@ -12,7 +12,8 @@ class TokenCreator:
         self.csrf = csrf
         self.cookie = cookie
 
-    def create_token(self, target_mid: str, description: str) -> str:
+    def create_token(self, target_mid: str, description: str) -> Optional[str]:
+        url = APIUrls.PERSONAL_ACCESS_TOKEN_URL
         data = {
             "action": "issuePersonalAccessToken",
             "description": description,
@@ -23,21 +24,24 @@ class TokenCreator:
         headers = {
             "Content-Type": "application/x-www-form-urlencoded",
             "Cookie": self.cookie,
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36",
+            "Accept": "application/json, text/javascript, */*; q=0.01",
+            "X-Requested-With": "XMLHttpRequest",
         }
         try:
-            response = requests.post(
-                APIUrls.PERSONAL_ACCESS_TOKEN_URL, headers=headers, data=data
-            )
+            response = requests.post(url, headers=headers, data=data)
             response.raise_for_status()
-            token = response.json().get("token", "")
-            if not token:
+            if response.status_code == 200:
+                return response.json().get("token")
+            else:
                 logging.warning(
-                    f"Token generation response does not contain a token: {response.json()}"
+                    f"Failed to generate token. Status code: {response.status_code}"
                 )
-            return token
+                logging.warning(f"Response content: {response.text}")
+                return None
         except requests.RequestException as e:
             logging.error(f"Error occurred while generating LINE Notify token: {e}")
-            return ""
+            return None
 
     def create_multiple_tokens(
         self, target_mid: str, num_tokens: int = 1, custom_string: Optional[str] = None

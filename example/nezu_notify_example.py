@@ -1,71 +1,215 @@
+import json
+import logging
 import os
+from typing import Dict, Optional, Tuple
 
+from dotenv import load_dotenv
+
+from NezuNotify.group_manager import GroupManager
 from NezuNotify.nezu_notify import NezuNotify
 
-# 環境変数から認証情報を取得
+load_dotenv()
+
 csrf = os.environ.get("LINE_CSRF_TOKEN")
 cookie = os.environ.get("LINE_COOKIE")
-target_mid = os.environ.get("LINE_TARGET_MID")
-existing_token = os.environ.get("LINE_EXISTING_TOKEN")
+
+TOKENS_FILE = "./tokens.json"
+
+logging.basicConfig(level=logging.INFO)
 
 
-def token_management_example():
-    print("=== トークン管理の例 ===")
-    nezu_create = NezuNotify(csrf=csrf, cookie=cookie, target_mid=target_mid)
+class TokenManager:
+    def __init__(self, tokens_file: str = "./tokens.json"):
+        self.tokens_file = tokens_file
 
-    # トークンの作成
+    def save_token(self, target_mid: str, token_name: str, token: str) -> None:
+        tokens = self.load_tokens()
+        if target_mid not in tokens:
+            tokens[target_mid] = {}
+        tokens[target_mid][token_name] = token
+        try:
+            with open(self.tokens_file, "w") as f:
+                json.dump(tokens, f, indent=2)
+            logging.info(f"トークンが {self.tokens_file} に保存されました。")
+        except IOError as e:
+            logging.error(f"トークンの保存中にエラーが発生しました: {e}")
+
+    def load_tokens(self) -> Dict[str, Dict[str, str]]:
+        try:
+            with open(self.tokens_file, "r") as f:
+                return json.load(f)
+        except FileNotFoundError:
+            logging.warning(
+                f"{self.tokens_file} が見つかりません。空の辞書を返します。"
+            )
+            return {}
+        except json.JSONDecodeError:
+            logging.error(
+                f"{self.tokens_file} の解析に失敗しました。空の辞書を返します。"
+            )
+            return {}
+
+    def load_token(self, target_mid: str, token_name: str) -> Optional[str]:
+        tokens = self.load_tokens()
+        token = tokens.get(target_mid, {}).get(token_name)
+        if token is None:
+            logging.warning(
+                f"トークン '{token_name}' (MID: {target_mid}) が見つかりません。"
+            )
+        return token
+
+
+def create_new_token(
+    token_manager: TokenManager,
+) -> Tuple[Optional[str], Optional[str]]:
+    logging.info("=== 新しいトークンの作成 ===")
+    group_manager = GroupManager(csrf=csrf, cookie=cookie)
+
+    groups = group_manager.get_groups()
+    if not groups:
+        logging.error(
+            "グループが見つかりませんでした。CSRFトークンとCookieを確認してください。"
+        )
+        return None, None
+
+    logging.info("グループ一覧:")
+    for i, group in enumerate(groups, 1):
+        logging.info(f"{i}. 名前: {group['name']}, ID: {group['mid']}")
+
+    while True:
+        try:
+            choice = int(input("使用するグループの番号を入力してください: "))
+            if 1 <= choice <= len(groups):
+                target_id = groups[choice - 1]["mid"]
+                break
+            else:
+                logging.error("無効な選択です。リストの番号を入力してください。")
+        except ValueError:
+            logging.error("数字を入力してください。")
+
+    token_name = input("新しいトークンの名前を入力してください: ")
+
+    nezu_create = NezuNotify(csrf=csrf, cookie=cookie, target_mid=target_id)
     new_token = nezu_create.process("create", "新しいトークン")
-    print(f"新しいトークン: {new_token}")
 
-    # トークンのステータス確認
-    nezu_check = NezuNotify(token=new_token)
-    status = nezu_check.process("check", new_token)
-    print(f"トークンのステータス: {status}")
+    if new_token:
+        logging.info(f"新しいトークン: {new_token}")
+        token_manager.save_token(target_id, token_name, new_token)
+        logging.info(f"トークンが {token_manager.tokens_file} に保存されました。")
 
-    # トークンの無効化
-    nezu_revoke = NezuNotify(token=new_token)
-    revoke_result = nezu_revoke.process("revoke", new_token)
-    print(f"トークン無効化結果: {revoke_result}")
-
-    # グループ一覧の取得
-    groups = nezu_create.get_groups()
-    print("グループ一覧:")
-    for group in groups:
-        print(f"名前: {group['name']}, MID: {group['mid']}")
+        nezu_check = NezuNotify(token=new_token, csrf=csrf, cookie=cookie)
+        status = nezu_check.process("check", new_token)
+        logging.info(f"トークンのステータス: {status}")
+        return target_id, token_name
+    else:
+        logging.error("トークンの作成に失敗しました。")
+        return None, None
 
 
-def sending_example():
-    print("\n=== 送信の例 ===")
+def use_existing_token(
+    token_manager: TokenManager,
+) -> Tuple[Optional[str], Optional[str]]:
+    logging.info("=== 既存のトークンの使用 ===")
+    tokens = token_manager.load_tokens()
+    if not tokens:
+        logging.error("保存されているトークンがありません。")
+        return None, None
 
-    # テキストメッセージの送信
-    nezu_text = NezuNotify(
-        token=existing_token,
-        message_type="text",
-        message_content="これはテストメッセージです。",
-    )
-    send_result = nezu_text.process("send")
-    print(f"テキストメッセージ送信結果: {send_result}")
+    token_list = []
+    logging.info("保存されているトークン:")
+    for i, (target_id, token_dict) in enumerate(tokens.items(), 1):
+        for token_name in token_dict.keys():
+            logging.info(f"{i}. グループID: {target_id}, トークン名: {token_name}")
+            token_list.append((target_id, token_name))
 
-    # URLを使用した画像の送信
-    image_url = "https://example.com/image.jpg"
-    nezu_url_image = NezuNotify(
-        token=existing_token, message_type="image", message_content=image_url
-    )
-    send_result = nezu_url_image.process("send")
-    print(f"URL画像送信結果: {send_result}")
+    while True:
+        try:
+            choice = int(input("使用するトークンの番号を入力してください: "))
+            if 1 <= choice <= len(token_list):
+                target_id, token_name = token_list[choice - 1]
+                return target_id, token_name
+            else:
+                logging.error("無効な選択です。リストの番号を入力してください。")
+        except ValueError:
+            logging.error("数字を入力してください。")
 
-    # ローカルファイルからの画像送信
-    local_image_path = "/path/to/local/image.jpg"
-    nezu_local_image = NezuNotify(
-        token=existing_token, message_type="image", message_content=local_image_path
-    )
-    send_result = nezu_local_image.process("send")
-    print(f"ローカル画像送信結果: {send_result}")
+
+def send_message(token_manager: TokenManager, target_id: str, token_name: str):
+    token = token_manager.load_token(target_id, token_name)
+    if not token:
+        logging.error(f"トークン '{token_name}' が見つかりません。")
+        return
+
+    while True:
+        print("\n送信するメッセージタイプを選択してください:")
+        print("1. テキスト")
+        print("2. 画像")
+        print("3. メインメニューに戻る")
+
+        try:
+            choice = int(input("選択肢の番号を入力してください: "))
+            if choice == 1:
+                message_content = input("送信するテキストを入力してください: ")
+                nezu = NezuNotify(
+                    token=token, message_type="text", message_content=message_content
+                )
+                send_result = nezu.process("send")
+                logging.info(f"テキストメッセージ送信結果: {send_result}")
+            elif choice == 2:
+                image_type = input(
+                    "画像のタイプを選択してください (url/path): "
+                ).lower()
+                if image_type == "url":
+                    image_content = input("画像のURLを入力してください: ")
+                elif image_type == "path":
+                    image_content = input("画像のローカルパスを入力してください: ")
+                else:
+                    logging.error(
+                        "無効な選択です。'url'または'path'を入力してください。"
+                    )
+                    continue
+
+                nezu = NezuNotify(
+                    token=token, message_type="image", message_content=image_content
+                )
+                send_result = nezu.process("send")
+                logging.info(f"画像メッセージ送信結果: {send_result}")
+            elif choice == 3:
+                break
+            else:
+                logging.error("無効な選択です。1、2、または3を入力してください。")
+        except ValueError:
+            logging.error("数字を入力してください。")
 
 
 def main():
-    token_management_example()
-    sending_example()
+    token_manager = TokenManager()
+
+    while True:
+        print("\n操作を選択してください:")
+        print("1. 新しいトークンを作成")
+        print("2. 既存のトークンを使用")
+        print("3. プログラムを終了")
+
+        try:
+            choice = int(input("選択肢の番号を入力してください: "))
+            if choice == 1:
+                target_id, token_name = create_new_token(token_manager)
+            elif choice == 2:
+                target_id, token_name = use_existing_token(token_manager)
+            elif choice == 3:
+                logging.info("プログラムを終了します。")
+                break
+            else:
+                logging.error("無効な選択です。1、2、または3を入力してください。")
+                continue
+
+            if target_id and token_name:
+                send_message(token_manager, target_id, token_name)
+            else:
+                logging.error("有効なトークンが選択されませんでした。")
+        except ValueError:
+            logging.error("数字を入力してください。")
 
 
 if __name__ == "__main__":
