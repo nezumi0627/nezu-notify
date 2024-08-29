@@ -1,0 +1,22 @@
+# Pythonのバイトコード
+__pycache__/
+*.py[cod]
+
+# 環境設定ファイル
+.env
+.venv/
+venv/
+
+# IDEの設定ファイル
+.idea/
+.vscode/
+
+# アーカイブフォルダ
+Archive/
+
+# Jupyter Notebookのチェックポイント
+.ipynb_checkpoints/
+
+# その他の一時ファイル
+*.log
+*.tmp
