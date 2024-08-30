@@ -6,7 +6,7 @@
 
 NezuNotify is a Python library for easy utilization of LINE Notify. Its main features include:
 
-- Sending messages to LINE groups
+- Sending messages
 - Sending images (via URL or local file)
 - Sending stickers
 - Token generation and management
