@@ -90,6 +90,14 @@ class NezuNotify:
                 notify.send_image_with_local_path(
                     "画像を送信します", self.message_content
                 )
+        elif self.message_type == "sticker":
+            if not self.sticker_id or not self.sticker_package_id:
+                raise ValueError(
+                    "ステッカー送信にはsticker_idとsticker_package_idが必要です。"
+                )
+            notify.send_sticker(
+                self.message_content, self.sticker_package_id, self.sticker_id
+            )
         else:
             raise ValueError("無効なメッセージタイプです。")
 
