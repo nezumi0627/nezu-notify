@@ -13,12 +13,14 @@ venv/
 
 # アーカイブフォルダ
 Archive/
+OfficialNezuNotify/
 
 # デバッグ用ファイル
 test.py
 token.json
 notify-bot.line.me.har
 tokens.json
+example.py
 
 # Jupyter Notebookのチェックポイント
 .ipynb_checkpoints/
