@@ -144,7 +144,8 @@ def send_message(token_manager: TokenManager, target_id: str, token_name: str):
         print("\n送信するメッセージタイプを選択してください:")
         print("1. テキスト")
         print("2. 画像")
-        print("3. メインメニューに戻る")
+        print("3. ステッカー")
+        print("4. メインメニューに戻る")
 
         try:
             choice = int(input("選択肢の番号を入力してください: "))
@@ -156,18 +157,7 @@ def send_message(token_manager: TokenManager, target_id: str, token_name: str):
                 send_result = nezu.process("send")
                 logging.info(f"テキストメッセージ送信結果: {send_result}")
             elif choice == 2:
-                image_type = input(
-                    "画像のタイプを選択してください (url/path): "
-                ).lower()
-                if image_type == "url":
-                    image_content = input("画像のURLを入力してください: ")
-                elif image_type == "path":
-                    image_content = input("画像のローカルパスを入力してください: ")
-                else:
-                    logging.error(
-                        "無効な選択です。'url'または'path'を入力してください。"
-                    )
-                    continue
+                image_content = input("画像のURLまたはローカルパスを入力してください: ")
 
                 nezu = NezuNotify(
                     token=token, message_type="image", message_content=image_content
@@ -175,9 +165,21 @@ def send_message(token_manager: TokenManager, target_id: str, token_name: str):
                 send_result = nezu.process("send")
                 logging.info(f"画像メッセージ送信結果: {send_result}")
             elif choice == 3:
+                sticker_package_id = input("ステッカーパッケージIDを入力してください: ")
+                sticker_id = input("ステッカーIDを入力してください: ")
+
+                nezu = NezuNotify(
+                    token=token,
+                    message_type="sticker",
+                    sticker_package_id=sticker_package_id,
+                    sticker_id=sticker_id,
+                )
+                send_result = nezu.process("send")
+                logging.info(f"ステッカー送信結果: {send_result}")
+            elif choice == 4:
                 break
             else:
-                logging.error("無効な選択です。1、2、または3を入力してください。")
+                logging.error("無効な選択です。1、2、3、または4を入力してください。")
         except ValueError:
             logging.error("数字を入力してください。")
 
