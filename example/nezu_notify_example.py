@@ -156,18 +156,7 @@ def send_message(token_manager: TokenManager, target_id: str, token_name: str):
                 send_result = nezu.process("send")
                 logging.info(f"テキストメッセージ送信結果: {send_result}")
             elif choice == 2:
-                image_type = input(
-                    "画像のタイプを選択してください (url/path): "
-                ).lower()
-                if image_type == "url":
-                    image_content = input("画像のURLを入力してください: ")
-                elif image_type == "path":
-                    image_content = input("画像のローカルパスを入力してください: ")
-                else:
-                    logging.error(
-                        "無効な選択です。'url'または'path'を入力してください。"
-                    )
-                    continue
+                image_content = input("画像のURLまたはローカルパスを入力してください: ")
 
                 nezu = NezuNotify(
                     token=token, message_type="image", message_content=image_content
