@@ -24,9 +24,9 @@ class TokenManager:
     def revoke_all_tokens(self, tokens: list[str]) -> str:
         results = [self.revoke_token(token) for token in tokens]
         return (
-            "すべてのトークンが取り消されました。"
+            "All tokens have been revoked."
             if all(results)
-            else "一部のトークンの取り消しに失敗しました。"
+            else "Failed to revoke some tokens."
         )
 
     def check_token_status(self, token: str) -> dict:

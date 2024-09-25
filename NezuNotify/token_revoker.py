@@ -1,5 +1,3 @@
-import logging
-
 import requests
 
 
@@ -13,14 +11,13 @@ class TokenRevoker:
             "Content-Type": "application/x-www-form-urlencoded",
         }
 
-    def revoke(self, token: str) -> bool:
+    def revoke(self, token: str) -> str:
         url = "https://notify-bot.line.me/api/revoke"
         payload = f"token={token}"
 
         try:
             response = requests.post(url, headers=self.headers, data=payload)
             response.raise_for_status()
-            return True
+            return "Token revoked successfully."
         except requests.exceptions.RequestException as e:
-            logging.error(f"トークンの取り消し中にエラーが発生しました: {str(e)}")
-            return False
+            return f"Error occurred while revoking token: {str(e)}"

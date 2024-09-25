@@ -1,4 +1,3 @@
-import logging
 import os
 from typing import Dict, Optional
 
@@ -12,23 +11,21 @@ class LineNotify:
         self.token = token
         self.headers = {"Authorization": f"Bearer {self.token}"}
 
-    def send_message(self, message: str) -> None:
+    def send_message(self, message: str) -> str:
         data = {"message": message}
-        self._make_request(APIUrls.NOTIFY_URL, method="POST", data=data)
+        return self._make_request(APIUrls.NOTIFY_URL, method="POST", data=data)
 
-    def send_image_with_url(self, text: str, url: str) -> None:
+    def send_image_with_url(self, text: str, url: str) -> str:
         data = {
             "message": text,
             "imageThumbnail": url,
             "imageFullsize": url,
         }
-        self._make_request(APIUrls.NOTIFY_URL, method="POST", data=data)
+        return self._make_request(APIUrls.NOTIFY_URL, method="POST", data=data)
 
-    def send_image_with_local_path(self, text: str, path: str) -> None:
+    def send_image_with_local_path(self, text: str, path: str) -> str:
         if not os.path.exists(path):
-            raise FileNotFoundError(
-                f"Image file not found at the specified path: {path}"
-            )
+            return f"Image file not found at the specified path: {path}"
 
         try:
             with open(path, "rb") as image_file:
@@ -38,38 +35,34 @@ class LineNotify:
                     APIUrls.NOTIFY_URL, headers=self.headers, data=data, files=files
                 )
                 response.raise_for_status()
+                return "Image sent successfully."
         except IOError as e:
-            logging.error(f"Failed to read image file: {e}")
-            raise
+            return f"Failed to read image file: {e}"
         except requests.RequestException as e:
-            logging.error(f"Error occurred while sending image: {e}")
-            raise
+            return f"Error occurred while sending image: {e}"
 
     def send_sticker(
         self, message: str, sticker_id: str, sticker_package_id: str
-    ) -> None:
+    ) -> str:
         data = {
             "message": message,
             "stickerId": sticker_id,
             "stickerPackageId": sticker_package_id,
         }
-        self._make_request(APIUrls.NOTIFY_URL, method="POST", data=data)
+        return self._make_request(APIUrls.NOTIFY_URL, method="POST", data=data)
 
     def _make_request(
         self, endpoint: str, method: str = "GET", data: Optional[Dict] = None
-    ) -> requests.Response:
+    ) -> str:
         method = method.upper()
         if method not in {"GET", "POST"}:
-            raise ValueError(f"Invalid HTTP method specified: {method}")
+            return f"Invalid HTTP method specified: {method}"
 
         try:
             response = requests.request(
                 method, endpoint, headers=self.headers, data=data
             )
             response.raise_for_status()
-            return response
+            return "Request successful."
         except requests.RequestException as e:
-            logging.error(
-                f"HTTP request error - URL: {endpoint}, Method: {method}, Error: {e}"
-            )
-            raise
+            return f"HTTP request error - URL: {endpoint}, Method: {method}, Error: {e}"

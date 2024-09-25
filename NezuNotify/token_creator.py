@@ -1,5 +1,3 @@
-import logging
-import secrets
 from typing import List, Optional
 
 import requests
@@ -34,14 +32,9 @@ class TokenCreator:
             if response.status_code == 200:
                 return response.json().get("token")
             else:
-                logging.warning(
-                    f"Failed to generate token. Status code: {response.status_code}"
-                )
-                logging.warning(f"Response content: {response.text}")
-                return None
+                return f"Failed to generate token. Status code: {response.status_code}, Response: {response.text}"
         except requests.RequestException as e:
-            logging.error(f"Error occurred while generating LINE Notify token: {e}")
-            return None
+            return f"Error occurred while generating LINE Notify token: {str(e)}"
 
     def create_multiple_tokens(
         self, target_mid: str, num_tokens: int = 1, custom_string: Optional[str] = None
@@ -51,14 +44,13 @@ class TokenCreator:
             self.create_token(target_mid, custom_string or "NezuNotify")
             for _ in range(num_tokens)
         ]
-        valid_tokens = [token for token in tokens if token]
+        valid_tokens = [
+            token
+            for token in tokens
+            if isinstance(token, str) and token.startswith("token_")
+        ]
 
         if valid_tokens:
-            logging.info(f"{len(valid_tokens)} tokens have been generated.")
             return valid_tokens
         else:
-            logging.warning("Failed to generate tokens.")
-            return []
-
-    def generate_token(self, length: int = 16) -> str:
-        return secrets.token_hex(length)
+            return ["Failed to generate tokens."]

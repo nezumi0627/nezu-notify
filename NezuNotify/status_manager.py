@@ -1,4 +1,3 @@
-import logging
 from typing import Dict, List
 
 import requests
@@ -23,8 +22,7 @@ class StatusManager:
             Dict[str, str]: A dictionary mapping each token to its status.
         """
         if not tokens:
-            logging.warning("No tokens provided.")
-            return {}
+            return {"warning": "No tokens provided."}
 
         return {token: self._check_single_token_status(token) for token in tokens}
 
@@ -48,10 +46,7 @@ class StatusManager:
             response.raise_for_status()
             return self._determine_status(response)
         except requests.RequestException as error:
-            logging.error(
-                f"Error occurred while checking status for token {token}: {error}"
-            )
-            return "Error"
+            return f"Error: {str(error)}"
 
     def _determine_status(self, response: requests.Response) -> str:
         """
@@ -68,5 +63,4 @@ class StatusManager:
         elif response.status_code == 401:
             return "Blocked token"
         else:
-            logging.error(f"Unexpected response status code: {response.status_code}")
-            return "Waiting"
+            return f"Unexpected status code: {response.status_code}"

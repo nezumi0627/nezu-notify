@@ -1,5 +1,4 @@
 import json
-import logging
 from typing import Dict, List, Optional
 
 import requests
@@ -27,29 +26,19 @@ class GroupManager:
         }
 
     def get_groups(self) -> List[Dict[str, str]]:
-        logging.info(f"Requesting groups from: {APIUrls.GROUP_LIST_URL}")
-        logging.info(f"Headers: {self.headers}")
-
         response = self._make_request(APIUrls.GROUP_LIST_URL)
         if response:
-            logging.info(f"Response status code: {response.status_code}")
-            logging.info(f"Response content: {response.text}")
-
             if response.status_code == 200:
                 try:
                     data = response.json()
                     groups = data.get("results", [])
-                    logging.info(f"Received {len(groups)} groups")
                     return groups
                 except json.JSONDecodeError:
-                    logging.error("JSONのデコードに失敗しました。")
+                    return "Failed to decode JSON."
             else:
-                logging.error(
-                    f"グループの取得に失敗しました。ステータスコード: {response.status_code}"
-                )
+                return f"Failed to retrieve groups. Status code: {response.status_code}"
         else:
-            logging.error("APIリクエストに失敗しました。")
-        return []
+            return "API request failed."
 
     def create_token(
         self, description: str, target_type: str, target_mid: str
@@ -69,27 +58,25 @@ class GroupManager:
                 result = response.json()
                 return result.get("token")
             except json.JSONDecodeError:
-                logging.error("JSONのデコードに失敗しました。")
+                return "Failed to decode JSON."
         else:
-            logging.error(
-                f"トークンの作成に失敗しました。ステータスコード: {response.status_code if response else 'Unknown'}"
-            )
-        return None
+            return f"Failed to create token. Status code: {response.status_code if response else 'Unknown'}"
 
     def get_group_by_mid(self, mid: str) -> Optional[Dict[str, str]]:
         groups = self.get_groups()
+        if isinstance(groups, str):
+            return groups  # Return error message
         for group in groups:
             if group["mid"] == mid:
                 return group
-        logging.warning(f"Group with MID: {mid} not found.")
-        return None
+        return f"Group with MID: {mid} not found."
 
     def _make_request(
         self, endpoint: str, method: str = "GET", data: Optional[Dict] = None
     ) -> Optional[requests.Response]:
         method = method.upper()
         if method not in {"GET", "POST"}:
-            raise ValueError(f"Invalid HTTP method specified: {method}")
+            return f"Invalid HTTP method specified: {method}"
 
         try:
             response = requests.request(
@@ -98,9 +85,9 @@ class GroupManager:
             response.raise_for_status()
             return response
         except requests.RequestException as e:
-            logging.error(
+            error_message = (
                 f"HTTP request error - URL: {endpoint}, Method: {method}, Error: {e}"
             )
             if hasattr(e, "response"):
-                logging.error(f"エラーレスポンス: {e.response.text}")
-            return None
+                error_message += f" Error response: {e.response.text}"
+            return error_message

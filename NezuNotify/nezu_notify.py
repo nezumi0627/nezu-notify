@@ -7,7 +7,7 @@ from .token_manager import TokenManager
 
 
 class NezuNotify:
-    """NezuNotify クラスは、LINE Notify の操作を簡略化します。"""
+    """NezuNotify class simplifies the operations of LINE Notify."""
 
     def __init__(
         self,
@@ -21,17 +21,17 @@ class NezuNotify:
         sticker_package_id: Optional[str] = None,
     ):
         """
-        NezuNotify オブジェクトを初期化します。
+        Initialize a NezuNotify object.
 
         Args:
-            csrf (Optional[str]): CSRF トークン
-            cookie (Optional[str]): セッションクッキー
-            target_mid (Optional[str]): ターゲットの MID
-            token (Optional[str]): LINE Notify トークン
-            message_type (Optional[str]): メッセージタイプ
-            message_content (Optional[str]): メッセージ内容
-            sticker_id (Optional[str]): スタッカーID
-            sticker_package_id (Optional[str]): スタッカーパッケージID
+            csrf (Optional[str]): CSRF token
+            cookie (Optional[str]): Session cookie
+            target_mid (Optional[str]): Target MID
+            token (Optional[str]): LINE Notify token
+            message_type (Optional[str]): Message type
+            message_content (Optional[str]): Message content
+            sticker_id (Optional[str]): Sticker ID
+            sticker_package_id (Optional[str]): Sticker package ID
         """
         self.csrf = csrf
         self.cookie = cookie
@@ -56,17 +56,17 @@ class NezuNotify:
         self, action: str, data: Optional[Union[str, List[str]]] = None
     ) -> Union[str, List[str], Dict[str, str]]:
         """
-        指定されたアクションを実行します。
+        Execute the specified action.
 
         Args:
-            action (str): 実行するアクション ('create', 'revoke', 'check', 'send')
-            data (Optional[Union[str, List[str]]]): アクションに必要なデータ
+            action (str): The action to perform ('create', 'revoke', 'check', 'send')
+            data (Optional[Union[str, List[str]]]): Data required for the action
 
         Returns:
-            Union[str, List[str], Dict[str, str]]: アクションの結果
+            Union[str, List[str], Dict[str, str]]: The result of the action
 
         Raises:
-            NezuNotifyValueError: 無効なアクションや不足しているデータがある場合
+            NezuNotifyValueError: If the action is invalid or required data is missing
         """
         actions = {
             "create": self._create,
@@ -76,19 +76,19 @@ class NezuNotify:
         }
         if action not in actions:
             raise NezuNotifyValueError(
-                "無効なアクションです。'create'、'revoke'、'check'、または'send'である必要があります。"
+                "Invalid action. It must be 'create', 'revoke', 'check', or 'send'."
             )
         if action in ["create", "revoke", "check"] and not self.token_manager:
             raise NezuNotifyValueError(
-                "トークン管理アクションには csrf と cookie が必要です。"
+                "CSRF and cookie are required for token management actions."
             )
         return actions[action](data)
 
     def _create(self, data: Optional[str] = None) -> str:
-        """トークンを作成します。"""
+        """Create a token."""
         if not self.csrf or not self.cookie or not self.target_mid:
             raise NezuNotifyValueError(
-                "トークン作成にはcsrf、cookie、target_midが必要です。"
+                "CSRF, cookie, and target_mid are required to create a token."
             )
         description = data or "NezuNotify"
         return self.token_manager.create_token(self.target_mid, description)
@@ -96,30 +96,28 @@ class NezuNotify:
     def _revoke(
         self, data: Optional[Union[str, List[str]]] = None
     ) -> Union[str, List[str]]:
-        """トークンを取り消します。"""
+        """Revoke a token."""
         if not data:
-            raise NezuNotifyValueError("トークンの取り消しにはトークンが必要です。")
+            raise NezuNotifyValueError("A token is required for revocation.")
         if isinstance(data, str):
             return self.token_manager.revoke_token(data)
         elif isinstance(data, list):
             return self.token_manager.revoke_all_tokens(data)
         else:
-            raise NezuNotifyValueError(
-                "データは文字列またはリストである必要があります。"
-            )
+            raise NezuNotifyValueError("Data must be a string or a list.")
 
     def _check(
         self, data: Optional[Union[str, List[str]]] = None
     ) -> Union[str, Dict[str, str]]:
-        """トークンのステータスを確認します。"""
+        """Check the status of a token."""
         if not data:
-            raise NezuNotifyValueError("ステータスの確認にはトークンが必要です。")
+            raise NezuNotifyValueError("A token is required to check the status.")
         return self.token_manager.check_token_status(data)
 
     def _send(self, data: Optional[str] = None) -> str:
-        """メッセージを送信します。"""
+        """Send a message."""
         if not self.line_notify:
-            raise NezuNotifyValueError("メッセージの送信にはトークンが必要です。")
+            raise NezuNotifyValueError("A token is required to send a message.")
 
         try:
             if self.message_type == "text":
@@ -127,32 +125,34 @@ class NezuNotify:
             elif self.message_type == "image":
                 if self.message_content.startswith(("http://", "https://")):
                     self.line_notify.send_image_with_url(
-                        "画像を送信します", self.message_content
+                        "Sending image", self.message_content
                     )
                 else:
                     self.line_notify.send_image_with_local_path(
-                        "画像を送信します", self.message_content
+                        "Sending image", self.message_content
                     )
             elif self.message_type == "sticker":
                 if not self.sticker_id or not self.sticker_package_id:
                     raise NezuNotifyValueError(
-                        "ステッカー送信にはsticker_idとsticker_package_idが必要です。"
+                        "sticker_id and sticker_package_id are required to send a sticker."
                     )
                 self.line_notify.send_sticker(
                     self.message_content, self.sticker_package_id, self.sticker_id
                 )
             else:
-                raise NezuNotifyValueError("無効なメッセージタイプです。")
+                raise NezuNotifyValueError("Invalid message type.")
         except Exception as e:
-            raise NezuNotifyError(f"メッセージの送信に失敗しました: {str(e)}") from e
+            raise NezuNotifyError(f"Failed to send the message: {str(e)}") from e
 
-        return "メッセージが送信されました。"
+        return "Message has been sent."
 
     def get_groups(self) -> List[Dict[str, str]]:
-        """グループのリストを取得します。"""
+        """Retrieve the list of groups."""
         if not self.group_manager:
-            raise NezuNotifyValueError("グループ管理には csrf と cookie が必要です。")
+            raise NezuNotifyValueError(
+                "CSRF and cookie are required for group management."
+            )
         try:
             return self.group_manager.get_groups()
         except Exception as e:
-            raise NezuNotifyError(f"グループの取得に失敗しました: {str(e)}") from e
+            raise NezuNotifyError(f"Failed to retrieve groups: {str(e)}") from e
