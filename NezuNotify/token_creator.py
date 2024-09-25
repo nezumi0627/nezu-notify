@@ -22,7 +22,11 @@ class TokenCreator:
         headers = {
             "Content-Type": "application/x-www-form-urlencoded",
             "Cookie": self.cookie,
-            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36",
+            "User-Agent": (
+                "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+                "AppleWebKit/537.36 (KHTML, like Gecko) "
+                "Chrome/58.0.3029.110 Safari/537.36"
+            ),
             "Accept": "application/json, text/javascript, */*; q=0.01",
             "X-Requested-With": "XMLHttpRequest",
         }
@@ -32,12 +36,21 @@ class TokenCreator:
             if response.status_code == 200:
                 return response.json().get("token")
             else:
-                return f"Failed to generate token. Status code: {response.status_code}, Response: {response.text}"
+                return (
+                    f"Failed to generate token. Status code: "
+                    f"{response.status_code}, Response: {response.text}"
+                )
         except requests.RequestException as e:
-            return f"Error occurred while generating LINE Notify token: {str(e)}"
+            return (
+                f"Error occurred while generating LINE Notify token: "
+                f"{str(e)}"
+            )
 
     def create_multiple_tokens(
-        self, target_mid: str, num_tokens: int = 1, custom_string: Optional[str] = None
+        self,
+        target_mid: str,
+        num_tokens: int = 1,
+        custom_string: Optional[str] = None,
     ) -> List[str]:
         num_tokens = min(num_tokens, 100)
         tokens = [

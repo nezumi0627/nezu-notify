@@ -1,0 +1,4 @@
+ruff==0.6.7
+mypy==1.11.2
+mypy-extensions==1.0.0
+python-dotenv==1.0.1

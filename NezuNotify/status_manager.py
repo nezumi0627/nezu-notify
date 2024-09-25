@@ -24,7 +24,9 @@ class StatusManager:
         if not tokens:
             return {"warning": "No tokens provided."}
 
-        return {token: self._check_single_token_status(token) for token in tokens}
+        return {
+            token: self._check_single_token_status(token) for token in tokens
+        }
 
     def _check_single_token_status(self, token: str) -> str:
         """

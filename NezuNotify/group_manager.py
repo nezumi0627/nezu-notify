@@ -12,7 +12,11 @@ class GroupManager:
         self.csrf = csrf
         self.cookie = cookie
         self.headers = {
-            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36",
+            "User-Agent": (
+                "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+                "AppleWebKit/537.36 (KHTML, like Gecko) "
+                "Chrome/125.0.0.0 Safari/537.36"
+            ),
             "Accept": "application/json, text/javascript, */*; q=0.01",
             "Accept-Language": "ja,en-US;q=0.9,en;q=0.8",
             "Referer": "https://notify-bot.line.me/my/",
@@ -36,7 +40,10 @@ class GroupManager:
                 except json.JSONDecodeError:
                     return "Failed to decode JSON."
             else:
-                return f"Failed to retrieve groups. Status code: {response.status_code}"
+                return (
+                    f"Failed to retrieve groups. Status code: "
+                    f"{response.status_code}"
+                )
         else:
             return "API request failed."
 
@@ -60,7 +67,10 @@ class GroupManager:
             except json.JSONDecodeError:
                 return "Failed to decode JSON."
         else:
-            return f"Failed to create token. Status code: {response.status_code if response else 'Unknown'}"
+            return (
+                f"Failed to create token. Status code: "
+                f"{response.status_code if response else 'Unknown'}"
+            )
 
     def get_group_by_mid(self, mid: str) -> Optional[Dict[str, str]]:
         groups = self.get_groups()
@@ -86,7 +96,8 @@ class GroupManager:
             return response
         except requests.RequestException as e:
             error_message = (
-                f"HTTP request error - URL: {endpoint}, Method: {method}, Error: {e}"
+                f"HTTP request error - URL: {endpoint}, Method: {method}, "
+                f"Error: {e}"
             )
             if hasattr(e, "response"):
                 error_message += f" Error response: {e.response.text}"

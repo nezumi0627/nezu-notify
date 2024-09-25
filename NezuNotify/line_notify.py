@@ -32,7 +32,10 @@ class LineNotify:
                 files = {"imageFile": image_file}
                 data = {"message": text}
                 response = requests.post(
-                    APIUrls.NOTIFY_URL, headers=self.headers, data=data, files=files
+                    APIUrls.NOTIFY_URL,
+                    headers=self.headers,
+                    data=data,
+                    files=files,
                 )
                 response.raise_for_status()
                 return "Image sent successfully."
@@ -65,4 +68,7 @@ class LineNotify:
             response.raise_for_status()
             return "Request successful."
         except requests.RequestException as e:
-            return f"HTTP request error - URL: {endpoint}, Method: {method}, Error: {e}"
+            return (
+                f"HTTP request error - URL: {endpoint}, Method: {method}, "
+                f"Error: {e}"
+            )

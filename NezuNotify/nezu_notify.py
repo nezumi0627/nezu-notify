@@ -59,14 +59,17 @@ class NezuNotify:
         Execute the specified action.
 
         Args:
-            action (str): The action to perform ('create', 'revoke', 'check', 'send')
-            data (Optional[Union[str, List[str]]]): Data required for the action
+            action (str): The action to perform ('create', 'revoke', 'check',
+                'send')
+            data (Optional[Union[str, List[str]]]): Data required for the \
+                action.
 
         Returns:
             Union[str, List[str], Dict[str, str]]: The result of the action
 
         Raises:
-            NezuNotifyValueError: If the action is invalid or required data is missing
+            NezuNotifyValueError: If the action is invalid or required data
+                is missing
         """
         actions = {
             "create": self._create,
@@ -76,7 +79,8 @@ class NezuNotify:
         }
         if action not in actions:
             raise NezuNotifyValueError(
-                "Invalid action. It must be 'create', 'revoke', 'check', or 'send'."
+                "Invalid action. It must be 'create', 'revoke', 'check', or "
+                "'send'."
             )
         if action in ["create", "revoke", "check"] and not self.token_manager:
             raise NezuNotifyValueError(
@@ -111,13 +115,17 @@ class NezuNotify:
     ) -> Union[str, Dict[str, str]]:
         """Check the status of a token."""
         if not data:
-            raise NezuNotifyValueError("A token is required to check the status.")
+            raise NezuNotifyValueError(
+                "A token is required to check the status."
+            )
         return self.token_manager.check_token_status(data)
 
     def _send(self, data: Optional[str] = None) -> str:
         """Send a message."""
         if not self.line_notify:
-            raise NezuNotifyValueError("A token is required to send a message.")
+            raise NezuNotifyValueError(
+                "A token is required to send a message."
+            )
 
         try:
             if self.message_type == "text":
@@ -134,15 +142,20 @@ class NezuNotify:
             elif self.message_type == "sticker":
                 if not self.sticker_id or not self.sticker_package_id:
                     raise NezuNotifyValueError(
-                        "sticker_id and sticker_package_id are required to send a sticker."
+                        "sticker_id and sticker_package_id are required to "
+                        "send a sticker."
                     )
                 self.line_notify.send_sticker(
-                    self.message_content, self.sticker_package_id, self.sticker_id
+                    self.message_content,
+                    self.sticker_package_id,
+                    self.sticker_id,
                 )
             else:
                 raise NezuNotifyValueError("Invalid message type.")
         except Exception as e:
-            raise NezuNotifyError(f"Failed to send the message: {str(e)}") from e
+            raise NezuNotifyError(
+                f"Failed to send the message: {str(e)}"
+            ) from e
 
         return "Message has been sent."
 
@@ -155,4 +168,6 @@ class NezuNotify:
         try:
             return self.group_manager.get_groups()
         except Exception as e:
-            raise NezuNotifyError(f"Failed to retrieve groups: {str(e)}") from e
+            raise NezuNotifyError(
+                f"Failed to retrieve groups: {str(e)}"
+            ) from e
