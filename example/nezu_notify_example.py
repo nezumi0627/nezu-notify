@@ -39,14 +39,10 @@ class TokenManager:
             with open(self.tokens_file, "r") as f:
                 return json.load(f)
         except FileNotFoundError:
-            logging.warning(
-                f"{self.tokens_file} が見つかりません。空の辞書を返します。"
-            )
+            logging.warning(f"{self.tokens_file} が見つかりません。")
             return {}
         except json.JSONDecodeError:
-            logging.error(
-                f"{self.tokens_file} の解析に失敗しました。空の辞書を返します。"
-            )
+            logging.error(f"{self.tokens_file} の解析に失敗しました。")
             return {}
 
     def load_token(self, target_mid: str, token_name: str) -> Optional[str]:
@@ -54,7 +50,7 @@ class TokenManager:
         token = tokens.get(target_mid, {}).get(token_name)
         if token is None:
             logging.warning(
-                f"トークン '{token_name}' (MID: {target_mid}) が見つかりません。"
+                f"トークン '{token_name}' (MID: {target_mid}) が見つかりません"
             )
         return token
 
@@ -83,7 +79,9 @@ def create_new_token(
                 target_id = groups[choice - 1]["mid"]
                 break
             else:
-                logging.error("無効な選択です。リストの番号を入力してください。")
+                logging.error(
+                    "無効な選択です。リストの番号を入力してください。"
+                )
         except ValueError:
             logging.error("数字を入力してください。")
 
@@ -95,7 +93,9 @@ def create_new_token(
     if new_token:
         logging.info(f"新しいトークン: {new_token}")
         token_manager.save_token(target_id, token_name, new_token)
-        logging.info(f"トークンが {token_manager.tokens_file} に保存されました。")
+        logging.info(
+            f"トークンが {token_manager.tokens_file} に保存されました。"
+        )
 
         nezu_check = NezuNotify(token=new_token, csrf=csrf, cookie=cookie)
         status = nezu_check.process("check", new_token)
@@ -119,7 +119,9 @@ def use_existing_token(
     logging.info("保存されているトークン:")
     for i, (target_id, token_dict) in enumerate(tokens.items(), 1):
         for token_name in token_dict.keys():
-            logging.info(f"{i}. グループID: {target_id}, トークン名: {token_name}")
+            logging.info(
+                f"{i}. グループID: {target_id}, トークン名: {token_name}"
+            )
             token_list.append((target_id, token_name))
 
     while True:
@@ -129,7 +131,9 @@ def use_existing_token(
                 target_id, token_name = token_list[choice - 1]
                 return target_id, token_name
             else:
-                logging.error("無効な選択です。リストの番号を入力してください。")
+                logging.error(
+                    "無効な選択です。リストの番号を入力してください。"
+                )
         except ValueError:
             logging.error("数字を入力してください。")
 
@@ -152,20 +156,28 @@ def send_message(token_manager: TokenManager, target_id: str, token_name: str):
             if choice == 1:
                 message_content = input("送信するテキストを入力してください: ")
                 nezu = NezuNotify(
-                    token=token, message_type="text", message_content=message_content
+                    token=token,
+                    message_type="text",
+                    message_content=message_content,
                 )
                 send_result = nezu.process("send")
                 logging.info(f"テキストメッセージ送信結果: {send_result}")
             elif choice == 2:
-                image_content = input("画像のURLまたはローカルパスを入力してください: ")
+                image_content = input(
+                    "画像のURLまたはローカルパスを入力してください: "
+                )
 
                 nezu = NezuNotify(
-                    token=token, message_type="image", message_content=image_content
+                    token=token,
+                    message_type="image",
+                    message_content=image_content,
                 )
                 send_result = nezu.process("send")
                 logging.info(f"画像メッセージ送信結果: {send_result}")
             elif choice == 3:
-                sticker_package_id = input("ステッカーパッケージIDを入力してください: ")
+                sticker_package_id = input(
+                    "ステッカーパッケージIDを入力してください: "
+                )
                 sticker_id = input("ステッカーIDを入力してください: ")
 
                 nezu = NezuNotify(
@@ -179,7 +191,9 @@ def send_message(token_manager: TokenManager, target_id: str, token_name: str):
             elif choice == 4:
                 break
             else:
-                logging.error("無効な選択です。1、2、3、または4を入力してください。")
+                logging.error(
+                    "無効な選択です。1、2、3、または4を入力してください。"
+                )
         except ValueError:
             logging.error("数字を入力してください。")
 
@@ -203,7 +217,9 @@ def main():
                 logging.info("プログラムを終了します。")
                 break
             else:
-                logging.error("無効な選択です。1、2、または3を入力してください。")
+                logging.error(
+                    "無効な選択です。1、2、または3を入力してください。"
+                )
                 continue
 
             if target_id and token_name:

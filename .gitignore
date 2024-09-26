@@ -1,30 +1,53 @@
-# Pythonのバイトコード
+# Pythonのバイトコードとキャッシュファイル
 __pycache__/
 *.py[cod]
+*.pyo
 
-# 環境設定ファイル
-.env
+# Python仮想環境関連
 .venv/
 venv/
+ENV/
+env/
+*.env
 
-# IDEの設定ファイル
+# IDEやエディタの設定ファイル
 .idea/
 .vscode/
+*.sublime-project
+*.sublime-workspace
 
-# アーカイブフォルダ
-Archive/
-OfficialNezuNotify/
-
-# デバッグ用ファイル
-test.py
-token.json
-notify-bot.line.me.har
-tokens.json
-example.py
+# OSやエディタの一時ファイル
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
 
 # Jupyter Notebookのチェックポイント
 .ipynb_checkpoints/
 
-# その他の一時ファイル
+# ログファイル
 *.log
+
+# テンポラリファイル
 *.tmp
+
+# アーカイブフォルダ
+Archive/
+
+# 特定のプロジェクトファイルや一時ファイル
+OfficialNezuNotify/
+login_example.py
+NezuNotify/login.py
+test.py
+example.py
+
+# デバッグやテストで使用するファイル
+token.json
+tokens.json
+notify-bot.line.me.har
+
+# その他のデバッグ/一時ファイル
+*.bak
+*.backup
+*.orig
+*.save
