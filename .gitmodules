@@ -1,0 +1,3 @@
+[submodule "submodules/line-notify-manager"]
+	path = submodules/line-notify-manager
+	url = https://github.com/nanato12/line-notify-manager.git
