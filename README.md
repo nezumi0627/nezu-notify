@@ -16,7 +16,7 @@ NezuNotify は、LINE Notify を簡単に利用するための Python ライブ�
 
 ## インストール
 
-`git clone https://github.com/nezumi0627/NezuNotify.git`
+`git clone https://github.com/nezumi0627/nezu-notify.git`
 
 ## 使用方法
 
