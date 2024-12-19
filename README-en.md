@@ -16,7 +16,7 @@ NezuNotify is a Python library for easy utilization of LINE Notify. Its main fea
 
 ## Installation
 
-`git clone https://github.com/nezumi0627/NezuNotify.git`
+`git clone https://github.com/nezumi0627/nezu-notify.git`
 
 ## Usage
 
